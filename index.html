@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tienda de Vapers</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+
+  <header class="video-header">
+  <video autoplay muted loop playsinline>
+    <source src="/assets/Ink-35508-1.mp4" type="video/mp4" />
+    Tu navegador no soporta videos HTML5.
+  </video>
+  <div class="overlay">
+     <div class="anuncio-carrusel">
+      <div class="mensaje" id="mensaje-rotativo">📱 Seguinos en Instagram @vapezrt_</div>
+    </div>
+    <h1>VAPEZRT</h1>
+    <nav>
+      <a href="#productos">Productos</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </div>
+</header> 
+
+<section class="hero">
+  <img src="/assets/2023_1120_Ignite_Lifestyle_MikeKirschbaum_016_1_1000x.webp" alt="Portada de Vapers" />
+  <div class="hero-texto">
+    <h2>Explorá nuestros sabores</h2>
+    <p>Los mejores sabores, los mejores precios.</p>
+  </div>
+</section>
+
+
+  <main id="productos" class="productos">
+
+<section id="productos" class="productos">
+  <!-- Ignite V250 -->
+  <div class="producto">
+    <img src="" alt="Ignite V250 Black Blueberry Ice">
+    <h3>Ignite V250 Black</h3>
+    <p>Blueberry Ice 🫐🧊</p>
+  </div>
+  <div class="producto">
+    <img src="" alt="Ignite V250 Black Blueberry Straw Coco">
+    <h3>Ignite V250 Black</h3>
+    <p>Blueberry Straw Coco 🫐🍓🥥</p>
+  </div>
+
+  <div class="producto">
+     <img src="" alt="Ignite V250 Gold Blueberry Ice">
+    <h3>Ignite V250 Gold</h3>
+    <p>Blueberry Ice 🫐🧊</p>
+  </div>
+  <div class="producto">
+    <img src="" alt="Ignite V250 Gold Blue Straw Coco">
+    <h3>Ignite V250 Gold</h3>
+    <p>Blue Straw Coco 🫐🍓🥥</p>
+  </div>
+  <div class="producto">
+    <img src="" alt="Ignite V250 Gold Watermelon Dragon Fruit">
+    <h3>Ignite V250 Gold</h3>
+    <p>Watermelon Dragon Fruit 🍉🍓🍋</p>
+  </div>
+  <div class="producto">
+    <img src="" alt="Ignite V250 Gold Strawberry">
+    <h3>Ignite V250 Gold</h3>
+    <p>Strawberry 🍓</p>
+  </div>
+  <div class="producto">
+    <img src="" alt="Ignite V250 Banana Coconut Watermelon">
+    <h3>Ignite V250 Gold</h3>
+    <p>Banana Coconut Watermelon 🍌🥥🍉</p>
+  </div>
+  <div class="producto">
+    <img src="" alt="Ignite V250 Gold Strawberry Kiwi">
+    <h3>Ignite V250 Gold</h3>
+    <p>Strawberry Kiwi 🍓🥝</p>
+  </div>
+  <div class="producto">
+    <img src="" alt="Ignite V250 Gold Pineapple Mango">
+    <h3>Ignite V250 Gold</h3>
+    <p>Pineapple Mango 🍍🥭</p>
+  </div>
+
+  <!-- Ignite V150 -->
+  <div class="producto">
+    <h3>Ignite V150</h3>
+    <p>Berry Blast 🍒🫐</p>
+  </div>
+  <div class="producto">
+    <h3>Ignite V150</h3>
+    <p>Blue Dream 🫐🫐</p>
+  </div>
+  <div class="producto">
+    <h3>Ignite V150</h3>
+    <p>Blueberry Ice 🫐🧊</p>
+  </div>
+  <div class="producto">
+    <h3>Ignite V150</h3>
+    <p>Dragon Fruit Lemonade 🍓🥭🍋</p>
+  </div>
+  <div class="producto">
+    <h3>Ignite V150</h3>
+    <p>Cherry Banana 🍒🍌</p>
+  </div>
+  <div class="producto">
+    <h3>Ignite V150</h3>
+    <p>Sour Raspberry 🍒🍧</p>
+  </div>
+  <div class="producto">
+    <h3>Ignite V150</h3>
+    <p>Strawberry Ice 🍓</p>
+  </div>
+
+  <!-- Elfbar 40k -->
+  <div class="producto">
+    <h3>Elfbar 40k</h3>
+    <p>Peach 🍑</p>
+  </div>
+  <div class="producto">
+    <h3>Elfbar 40k</h3>
+    <p>Strawberry 🍓</p>
+  </div>
+  <div class="producto">
+    <h3>Elfbar 40k</h3>
+    <p>Strawberry Watermelon 🍓🍉</p>
+  </div>
+  <div class="producto">
+    <h3>Elfbar 40k</h3>
+    <p>Grape Ice 🍇🧊</p>
+  </div>
+  <div class="producto">
+    <h3>Elfbar 40k</h3>
+    <p>Apple Candy 🍏🍎🍭</p>
+  </div>
+</section>
+
+
+  </main>
+
+  <footer id="contacto">
+    <h2>Contacto</h2>
+    <p>Email: contacto@vapeshop.com</p>
+    <p>WhatsApp: +54 9 11 1234-5678</p>
+  </footer>
+
+<script>
+  const mensajes = [
+    "📱 Seguinos en Instagram @vapezrt_",
+    "🕒 Horarios: lunes a lunes de 10 AM a 00:00"
+  ];
+
+  let index = 0;
+  const mensajeEl = document.getElementById("mensaje-rotativo");
+
+  function actualizarMensaje() {
+    mensajeEl.textContent = mensajes[index];
+    mensajeEl.style.animation = "none"; // reinicia animación
+    void mensajeEl.offsetWidth; // fuerza el reinicio
+    mensajeEl.style.animation = "slide 16s linear infinite";
+
+    index = (index + 1) % mensajes.length;
+  }
+
+  setInterval(actualizarMensaje, 16000); // cambia cada 8s, mismo que duración del slide
+</script>
+
+
+</body>
+</html>
