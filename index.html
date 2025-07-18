@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+<a href="https://wa.me/5493487652952" class="wsp-fijo" target="_blank" aria-label="WhatsApp">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="icono-wsp">
+</a>
+
 
 
   <header class="video-header">
@@ -19,15 +23,14 @@
       <div class="mensaje" id="mensaje-rotativo">📱 Seguinos en Instagram @vapezrt_</div>
     </div>
     <h1>VAPEZRT</h1>
-    <nav>
-      <a href="#productos">Productos</a>
-      <a href="#contacto">Contacto</a>
-    </nav>
+    <div class="busqueda">
+    <input type="text" id="buscador" placeholder="Buscar productos... 🔍" />
+  </div>
   </div>
 </header> 
 
 <section class="hero">
-  <img src="/assets/2023_1120_Ignite_Lifestyle_MikeKirschbaum_016_1_1000x.webp" alt="Portada de Vapers" />
+  <img id="hero-imagen" src="/assets/2023_1120_Ignite_Lifestyle_MikeKirschbaum_016_1_1000x.webp" alt="Portada de Vapers" />
   <div class="hero-texto">
     <h2>Explorá nuestros sabores</h2>
     <p>Los mejores sabores, los mejores precios.</p>
@@ -40,13 +43,26 @@
 </main>
 
 
-  <footer id="contacto">
-    <h2>Contacto</h2>
-    <p>Email: contacto@vapeshop.com</p>
-    <p>WhatsApp: +54 9 11 1234-5678</p>
-  </footer>
+  <footer id="contacto" class="footer">
+  <div class="footer-contenido">
+    <h2>VAPEZRT</h2>
+    <p>🔥 Los mejores sabores. Atención personalizada.</p>
+    
+    <div class="footer-contacto">
+      <!-- <p><strong>Email:</strong> contacto@vapeshop.com</p> -->
+      <p><strong>WhatsApp:</strong> <a href="https://wa.me/5493487652952" target="_blank">+54 9 3487 652952</a></p>
+      <p><strong>Instagram:</strong> <a href="https://instagram.com/vapezrt_" target="_blank">@vapezrt_</a></p>
+    </div>
+  </div>
+  
+  <div class="footer-copy">
+    <p>&copy; 2025 VAPEZRT. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
 
 <script>
+  // Rotación del mensaje superior
   const mensajes = [
     "📱 Seguinos en Instagram @vapezrt_",
     "🕒 Horarios: lunes a lunes de 10 AM a 00:00"
@@ -57,15 +73,13 @@
 
   function actualizarMensaje() {
     mensajeEl.textContent = mensajes[index];
-    mensajeEl.style.animation = "none"; // reinicia animación
-    void mensajeEl.offsetWidth; // fuerza el reinicio
+    mensajeEl.style.animation = "none";
+    void mensajeEl.offsetWidth;
     mensajeEl.style.animation = "slide 16s linear infinite";
-
     index = (index + 1) % mensajes.length;
   }
 
-  setInterval(actualizarMensaje, 16000); // cambia cada 8s, mismo que duración del slide
-
+  setInterval(actualizarMensaje, 16000);
 </script>
 
 <script type="module">
@@ -86,21 +100,49 @@
   const db = getFirestore(app);
 
   const contenedor = document.querySelector(".productos");
-  contenedor.innerHTML = ""; // Limpiar lo que estaba hardcodeado
+  contenedor.innerHTML = "";
+
+  const buscador = document.getElementById("buscador");
 
   async function cargarProductos() {
     try {
       const querySnapshot = await getDocs(collection(db, "productos"));
       querySnapshot.forEach((doc) => {
         const prod = doc.data();
-        contenedor.innerHTML += `
-          <div class="producto">
-            <img src="${prod.imagen}" alt="${prod.nombre}">
-            <h3>${prod.nombre}</h3>
-            <p>${prod.sabor}</p>
-          </div>
+
+        const tarjeta = document.createElement("div");
+        tarjeta.classList.add("producto");
+
+        tarjeta.innerHTML = `
+          <img src="${prod.imagen}" alt="${prod.nombre}">
+          <h3>${prod.nombre}</h3>
+          <p>${prod.sabor}</p>
         `;
+
+        // Evento clic para abrir modal
+        tarjeta.addEventListener("click", () => {
+          document.getElementById("modal-img").src = prod.imagen;
+          document.getElementById("modal-nombre").textContent = prod.nombre;
+          document.getElementById("modal-sabor").textContent = prod.sabor;
+          // document.getElementById("modal-stock").textContent = "Stock: " + prod.stock;
+          document.getElementById("modal-wsp").href = `https://wa.me/5493487652952?text=Hola!%20Estoy%20interesado%20en%20${encodeURIComponent(prod.nombre)}%20(${encodeURIComponent(prod.sabor)})`;
+          document.getElementById("modal").classList.remove("hidden");
+        });
+
+        contenedor.appendChild(tarjeta);
       });
+
+      // Buscador funcional después de que los productos se renderizan
+      buscador.addEventListener("input", () => {
+        const filtro = buscador.value.toLowerCase();
+        const tarjetas = document.querySelectorAll(".producto");
+
+        tarjetas.forEach((card) => {
+          const texto = card.innerText.toLowerCase();
+          card.style.display = texto.includes(filtro) ? "block" : "none";
+        });
+      });
+
     } catch (error) {
       console.error("Error al cargar productos:", error);
       contenedor.innerHTML = "<p>No se pudieron cargar los productos.</p>";
@@ -110,6 +152,48 @@
   cargarProductos();
 </script>
 
+<script>
+  // Lógica para cerrar el modal
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("cerrarModal").addEventListener("click", () => {
+      document.getElementById("modal").classList.add("hidden");
+    });
+
+    window.addEventListener("click", (e) => {
+      const modal = document.getElementById("modal");
+      if (e.target === modal) {
+        modal.classList.add("hidden");
+      }
+    });
+  });
+</script>
+<script>
+  const imagenesHero = [
+    "/assets/2023_1120_Ignite_Lifestyle_MikeKirschbaum_016_1_1000x.webp",
+    "assets/Imagen de WhatsApp 2025-07-17 a las 22.23.09_bf985f76.webp.jpg",
+    "/assets/Imagen de WhatsApp 2025-07-18 a las 01.27.53_af5c1526.jpg"
+  ];
+
+  let indexHero = 0;
+  const heroImg = document.getElementById("hero-imagen");
+
+  setInterval(() => {
+    indexHero = (indexHero + 1) % imagenesHero.length;
+    heroImg.src = imagenesHero[indexHero];
+  }, 5000); // cambia cada 5 segundos
+</script>
+
+
+<div id="modal" class="modal hidden">
+  <div class="modal-content">
+    <span id="cerrarModal" class="cerrar">&times;</span>
+    <img id="modal-img" src="" alt="">
+    <h3 id="modal-nombre"></h3>
+    <p id="modal-sabor"></p>
+    <!-- <p id="modal-stock"></p> -->
+    <a id="modal-wsp" href="#" target="_blank" class="btn-wsp">Consultar por WhatsApp</a>
+  </div>
+</div>
 
 
 </body>
