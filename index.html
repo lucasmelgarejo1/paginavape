@@ -90,8 +90,18 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, getDocs, doc, getDoc, updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import {
+    getAuth,
+    onAuthStateChanged,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBkCmjY9pCUXLia-fsw9Od4AybFxRzCAjg",
@@ -103,11 +113,25 @@
     measurementId: "G-B84Z2N19NE"
   };
 
+  // Init
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
 
+  // Si venimos de signInWithRedirect, completa el login
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result?.user) {
+        console.log("Login por redirect OK:", result.user.uid);
+      }
+    })
+    .catch((e) => {
+      console.error("Redirect error:", e.code, e.message);
+    });
+
+  // DOM
   const contenedor = document.querySelector(".productos");
   const buscador = document.getElementById("buscador");
   const btnLogin = document.getElementById("btn-login");
@@ -115,18 +139,22 @@
 
   let isAdmin = false;
 
-  // ¿El usuario logueado está en /admins/{uid}?
+  // Chequear si el usuario logueado es admin (existe /admins/{uid})
   async function checkAdmin(uid) {
-    const ref = doc(db, "admins", uid);
-    const snap = await getDoc(ref);
-    return snap.exists();
+    try {
+      const ref = doc(db, "admins", uid);
+      const snap = await getDoc(ref);
+      return snap.exists();
+    } catch (e) {
+      console.error("checkAdmin error:", e);
+      return false;
+    }
   }
 
-  // Render de una tarjeta de producto (incluye “Editar stock” si isAdmin)
+  // Render de tarjeta (incluye botón Editar si isAdmin)
   function renderProducto(prod, id) {
     const tarjeta = document.createElement("div");
     tarjeta.classList.add("producto");
-
     tarjeta.innerHTML = `
       <img src="${prod.imagen}" alt="${prod.nombre}">
       <h3>${prod.nombre}</h3>
@@ -134,7 +162,7 @@
       ${isAdmin ? `<button class="btn-editar" style="margin-top:8px; padding:6px 10px; border-radius:8px;">Editar stock</button>` : ""}
     `;
 
-    // Click abre modal (tu lógica actual, sin stock visible)
+    // Click → abrir modal (sin mostrar stock)
     tarjeta.addEventListener("click", () => {
       document.getElementById("modal-img").src = prod.imagen;
       document.getElementById("modal-nombre").textContent = prod.nombre;
@@ -144,11 +172,11 @@
       document.getElementById("modal").classList.remove("hidden");
     });
 
-    // Botón “Editar stock” solo si es admin
+    // Editar stock (solo admin)
     if (isAdmin) {
       const btn = tarjeta.querySelector(".btn-editar");
       btn.addEventListener("click", async (e) => {
-        e.stopPropagation(); // no abrir modal
+        e.stopPropagation(); // evitar abrir modal
         const actual = Number.isFinite(prod.stock) ? prod.stock : 0;
         const entrada = prompt(`Nuevo stock para "${prod.nombre}" (${prod.sabor}):`, actual);
         if (entrada === null) return;
@@ -170,64 +198,80 @@
     contenedor.appendChild(tarjeta);
   }
 
+  // Cargar productos y montar buscador
   async function cargarProductos() {
     contenedor.innerHTML = "";
     try {
       const qs = await getDocs(collection(db, "productos"));
       qs.forEach((d) => {
         const prod = d.data();
-        renderProducto(prod, d.id); // pasamos el id del doc
+        renderProducto(prod, d.id);
       });
 
       // Buscador (post-render)
-      buscador.addEventListener("input", () => {
+      buscador?.addEventListener("input", () => {
         const filtro = buscador.value.toLowerCase();
-        const tarjetas = document.querySelectorAll(".producto");
-        tarjetas.forEach((card) => {
+        document.querySelectorAll(".producto").forEach((card) => {
           const texto = card.innerText.toLowerCase();
           card.style.display = texto.includes(filtro) ? "block" : "none";
         });
       });
-
     } catch (error) {
       console.error("Error al cargar productos:", error);
       contenedor.innerHTML = "<p>No se pudieron cargar los productos.</p>";
     }
   }
 
-  // Login / Logout
+  // Login con popup + fallback a redirect
   btnLogin?.addEventListener("click", async () => {
     try {
       await signInWithPopup(auth, provider);
     } catch (e) {
-      console.error(e);
-      alert("No se pudo iniciar sesión.");
+      console.error("Auth error:", e.code, e.message);
+      if (e.code === "auth/popup-blocked" || e.code === "auth/popup-closed-by-user") {
+        try {
+          await signInWithRedirect(auth, provider);
+        } catch (e2) {
+          console.error("Redirect error:", e2.code, e2.message);
+          alert("No se pudo iniciar sesión (redirect). Revisá que el popup no esté bloqueado.");
+        }
+      } else if (e.code === "auth/unauthorized-domain") {
+        alert("Dominio no autorizado en Firebase. Agregá tu dominio en Authentication → Settings → Authorized domains.");
+      } else if (e.code === "auth/operation-not-allowed") {
+        alert("Habilitá el proveedor Google en Authentication → Sign-in method.");
+      } else {
+        alert("No se pudo iniciar sesión. Revisá la consola para más detalle.");
+      }
     }
   });
+
+  // Logout
   btnLogout?.addEventListener("click", async () => {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
   });
 
-  // Cambios de sesión
+  // Estado de sesión → toggle UI y permisos
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Toggle botones
-      btnLogin.style.display = "none";
-      btnLogout.style.display = "inline-block";
-      // ¿Es admin?
+      btnLogin && (btnLogin.style.display = "none");
+      btnLogout && (btnLogout.style.display = "inline-block");
       isAdmin = await checkAdmin(user.uid);
     } else {
-      btnLogin.style.display = "inline-block";
-      btnLogout.style.display = "none";
+      btnLogin && (btnLogin.style.display = "inline-block");
+      btnLogout && (btnLogout.style.display = "none");
       isAdmin = false;
     }
-    // Re-render según permisos
-    cargarProductos();
+    cargarProductos(); // re-render según permisos
   });
 
-  // Primer render (usuario no logueado)
+  // Primer render
   cargarProductos();
 </script>
+
 
 
 <script>
